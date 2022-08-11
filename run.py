@@ -41,7 +41,7 @@ def parse_args() -> argparse.Namespace:
         "--timesteps", "-t",
         help="Number of timesteps to train",
         required=False,
-        default=10000
+        default=1e6
     )
     parser.add_argument(
         "--num-workers",
@@ -357,7 +357,7 @@ class EnergyPlusEnv(gym.Env):
         else:
             tmp_rew = 0
 
-        reward = -(1e-6 * (obs["elec"] + obs["dh"])) - tmp_rew - (1e-3 * obs["co2"])
+        reward = -(1e-7 * (obs["elec"] + obs["dh"])) - tmp_rew - (1e-3 * obs["co2"])
         return reward
 
     @staticmethod
