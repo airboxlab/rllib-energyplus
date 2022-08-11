@@ -1,4 +1,4 @@
-  Version,9.6;
+  Version,22.1;
 
   Timestep,4;
 
@@ -1400,7 +1400,8 @@
     0,                       !- Inside Sill Depth {m}
     0,                       !- Inside Sill Solar Absorptance
     0,                       !- Inside Reveal Depth {m}
-    0;                       !- Inside Reveal Solar Absorptance
+    0,                       !- Inside Reveal Solar Absorptance
+    CurtainWall;             !- NFRC Product Type for Assembly Calculations
 
   Construction,
     ASHRAE 189.1-2009 ExtRoof IEAD ClimateZone 1,  !- Name
@@ -8745,9 +8746,9 @@
     SimpleAndTabular;        !- Option Type
 
   Output:EnergyManagementSystem,
-    Verbose,    ! Actuator Availability Dictionary Reporting
-    Verbose,    ! Internal Variable Availability Dictionary Reporting
-    ErrorsOnly; ! EnergyPlus Runtime Language Debug Output Level
+    Verbose,                 !- Actuator Availability Dictionary Reporting
+    Verbose,                 !- Internal Variable Availability Dictionary Reporting
+    ErrorsOnly;              !- EMS Runtime Language Debug Output Level
 
   LifeCycleCost:NonrecurringCost,
     Default Cost,            !- Name
