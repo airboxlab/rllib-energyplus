@@ -842,8 +842,8 @@
     1,                       !- Begin Month
     1,                       !- Begin Day of Month
     2020,                    !- Begin Year
-    1,                       !- End Month
-    7,                       !- End Day of Month
+    12,                      !- End Month
+    31,                      !- End Day of Month
     2020,                    !- End Year
     Wednesday,               !- Day of Week for Start Day
     No,                      !- Use Weather File Holidays and Special Days
@@ -8304,16 +8304,6 @@
     Node 3,                  !- Air Outlet Node Name
     General;                 !- End-Use Subcategory
 
-  !- replaced by DRL control policy
-  !- SetpointManager:Warmest,
-  !-   Warmest Zone Supply Air Temp Reset,  !- Name
-  !-   Temperature,             !- Control Variable
-  !-   CTA AUDITOIRE 240P,      !- HVAC Air Loop Name
-  !-   20,                      !- Minimum Setpoint Temperature {C}
-  !-   25,                      !- Maximum Setpoint Temperature {C}
-  !-   MaximumTemperature,      !- Strategy
-  !-   Node 3;                  !- Setpoint Node or NodeList Name
-
   AirLoopHVAC:SupplyPath,
     CTA AUDITOIRE 240P Node 4 Supply Path,  !- Name
     Node 4,                  !- Supply Air Path Inlet Node Name
@@ -8755,9 +8745,3 @@
     Construction,            !- Category
     0,                       !- Cost
     ServicePeriod;           !- Start of Costs
-
-  ! PythonPlugin:Instance,
-  !   EMS-based Setpoint Managers,  !- Name
-  !   No,                     !- Run During Warmup Days
-  !   plugin,  !- Python Module Name
-  !   PythonSATSetpointManager;  !- Plugin Class Name
