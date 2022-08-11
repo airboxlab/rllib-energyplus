@@ -120,8 +120,6 @@ class EnergyPlusRunner:
         self.actuator_handles: Dict[str, int] = {}
 
     def start(self) -> None:
-        if self.energyplus_state:
-            self.energyplus_api.state_manager.delete_state(self.energyplus_state)
         self.energyplus_state = self.energyplus_api.state_manager.new_state()
 
         # run EnergyPlus in a non-blocking way
@@ -152,6 +150,7 @@ class EnergyPlusRunner:
     def stop(self) -> None:
         self.energyplus_exec_thread = None
         self.energyplus_api.runtime.clear_callbacks()
+        self.energyplus_api.state_manager.delete_state(self.energyplus_state)
 
     def failed(self) -> bool:
         return self.sim_results.get("exit_code", -1) > 0
