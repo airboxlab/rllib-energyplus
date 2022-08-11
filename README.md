@@ -1,6 +1,6 @@
-# EnergyPlus Python API sample
+# Ray RLlib - EnergyPlus Python API sample
 
-An example of how to hook into EnergyPlus runtime using Python API
+An example of how to train a control policy using Ray RLlib and EnergyPlus Python API.
 
 Requires EnergyPlus 9.3+
 
