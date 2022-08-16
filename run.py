@@ -76,14 +76,15 @@ class EnergyPlusRunner:
 
     def __init__(self, episode: int, env_config: Dict[str, Any], obs_queue: Queue, act_queue: Queue) -> None:
         self.episode = episode
-        self.energyplus_api: Optional[EnergyPlusAPI] = EnergyPlusAPI()
-        self.x: Optional[DataExchange] = self.energyplus_api.exchange
-        self.energyplus_state: Any = None
-        self.energyplus_exec_thread: Optional[threading.Thread] = None
+        self.env_config = env_config
         self.obs_queue = obs_queue
         self.act_queue = act_queue
+
+        self.energyplus_api = EnergyPlusAPI()
+        self.x: DataExchange = self.energyplus_api.exchange
+        self.energyplus_exec_thread: Optional[threading.Thread] = None
+        self.energyplus_state: Any = None
         self.sim_results: Dict[str, Any] = {}
-        self.env_config = env_config
 
         # below is declaration of variables, meters and actuators
         # this simulation will interact with
@@ -201,7 +202,7 @@ class EnergyPlusRunner:
         if self.act_queue.empty():
             return
         next_action = self.act_queue.get()
-        assert isinstance(next_action, (float, list, np.ndarray))
+        assert isinstance(next_action, float)
 
         self.x.set_actuator_value(
             state=state_argument,
@@ -321,18 +322,15 @@ class EnergyPlusEnv(gym.Env):
         )
 
         # enqueue action (received by EnergyPlus through dedicated callback)
+        # then wait to get next observation.
         # timeout is set to 2s to handle end of simulation case, which happens async
         # and materializes by worker thread waiting on this queue (EnergyPlus callback
         # not consuming anymore)
+        timeout = 2
         try:
-            self.act_queue.put(sat_spt_value, timeout=2)
-        except Full:
-            done = True
-
-        # wait for next observation to be available
-        try:
-            self.last_obs = obs = self.obs_queue.get(timeout=2)
-        except Empty:
+            self.act_queue.put(sat_spt_value, timeout=timeout)
+            self.last_obs = obs = self.obs_queue.get(timeout=timeout)
+        except (Full, Empty):
             done = True
             obs = self.last_obs
 
