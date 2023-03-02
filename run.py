@@ -301,7 +301,7 @@ class EnergyPlusEnv(gym.Env):
         options: Optional[Dict[str, Any]] = None
     ):
         self.episode += 1
-        self.last_obs = {}
+        self.last_obs = self.observation_space.sample()
 
         if self.energyplus_runner is not None:
             self.energyplus_runner.stop()
@@ -320,7 +320,12 @@ class EnergyPlusEnv(gym.Env):
         )
         self.energyplus_runner.start()
 
-        return self.step(action=0)[0], {}
+        try:
+            obs = self.obs_queue.get()
+        except Empty:
+            obs = self.last_obs
+
+        return np.array(list(obs.values())), {}
 
     def step(self, action):
         self.timestep += 1
