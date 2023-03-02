@@ -4,12 +4,15 @@ import threading
 from tempfile import TemporaryDirectory
 from typing import Dict, Any, Tuple, Optional, List
 
-import gym
+import gymnasium as gym
 import numpy as np
+import ray
+from gymnasium.spaces import Discrete
 from pyenergyplus.api import EnergyPlusAPI
 from pyenergyplus.datatransfer import DataExchange
-from ray import tune
-from ray.util.queue import Queue, Empty, Full
+from ray import tune, air
+from ray.rllib.algorithms.ppo import PPOConfig
+from queue import Queue, Empty, Full
 
 
 def parse_args() -> argparse.Namespace:
@@ -85,6 +88,7 @@ class EnergyPlusRunner:
         self.energyplus_exec_thread: Optional[threading.Thread] = None
         self.energyplus_state: Any = None
         self.sim_results: Dict[str, Any] = {}
+        self.simulation_complete = False
 
         # below is declaration of variables, meters and actuators
         # this simulation will interact with
@@ -149,9 +153,13 @@ class EnergyPlusRunner:
         self.energyplus_exec_thread.start()
 
     def stop(self) -> None:
-        self.energyplus_exec_thread = None
-        self.energyplus_api.runtime.clear_callbacks()
-        self.energyplus_api.state_manager.delete_state(self.energyplus_state)
+        if self.energyplus_exec_thread:
+            self.simulation_complete = True
+            self._flush_queues()
+            self.energyplus_exec_thread.join()
+            self.energyplus_exec_thread = None
+            self.energyplus_api.runtime.clear_callbacks()
+            self.energyplus_api.state_manager.delete_state(self.energyplus_state)
 
     def failed(self) -> bool:
         return self.sim_results.get("exit_code", -1) > 0
@@ -175,7 +183,7 @@ class EnergyPlusRunner:
         EnergyPlus callback that collects output variables/meters
         values and enqueue them
         """
-        if not self._init_callback(state_argument):
+        if self.simulation_complete or not self._init_callback(state_argument):
             return
 
         self.next_obs = {
@@ -196,7 +204,7 @@ class EnergyPlusRunner:
         """
         EnergyPlus callback that sets actuator value from last decided action
         """
-        if not self._init_callback(state_argument):
+        if self.simulation_complete or not self._init_callback(state_argument):
             return
 
         if self.act_queue.empty():
@@ -213,7 +221,7 @@ class EnergyPlusRunner:
     def _init_callback(self, state_argument) -> bool:
         """initialize EnergyPlus handles and checks if simulation runtime is ready"""
         return self._init_handles(state_argument) \
-               and not self.x.warmup_flag(state_argument)
+            and not self.x.warmup_flag(state_argument)
 
     def _init_handles(self, state_argument):
         """initialize sensors/actuators handles to interact with during simulation"""
@@ -254,6 +262,11 @@ class EnergyPlusRunner:
 
         return True
 
+    def _flush_queues(self):
+        for q in [self.obs_queue, self.act_queue]:
+            while not q.empty():
+                q.get()
+
 
 class EnergyPlusEnv(gym.Env):
 
@@ -276,13 +289,17 @@ class EnergyPlusEnv(gym.Env):
         self.last_obs = {}
 
         # action space: supply air temperature (100 possible values)
-        self.action_space = gym.spaces.Discrete(100)
+        self.action_space: Discrete = Discrete(100)
 
         self.energyplus_runner: Optional[EnergyPlusRunner] = None
         self.obs_queue: Optional[Queue] = None
         self.act_queue: Optional[Queue] = None
 
-    def reset(self):
+    def reset(
+        self, *,
+        seed: Optional[int] = None,
+        options: Optional[Dict[str, Any]] = None
+    ):
         self.episode += 1
         self.last_obs = {}
 
@@ -303,7 +320,7 @@ class EnergyPlusEnv(gym.Env):
         )
         self.energyplus_runner.start()
 
-        return self.step(action=0)[0]
+        return self.step(action=0)[0], {}
 
     def step(self, action):
         self.timestep += 1
@@ -337,7 +354,8 @@ class EnergyPlusEnv(gym.Env):
         # compute reward
         reward = self._compute_reward(obs)
 
-        return np.array(list(obs.values())), reward, done, {}
+        obs_vec = np.array(list(obs.values()))
+        return obs_vec, reward, done, False, {}
 
     def render(self, mode="human"):
         pass
@@ -360,9 +378,9 @@ class EnergyPlusEnv(gym.Env):
 
     @staticmethod
     def _rescale(
-            n: int,
-            range1: Tuple[float, float],
-            range2: Tuple[float, float]
+        n: int,
+        range1: Tuple[float, float],
+        range2: Tuple[float, float]
     ) -> float:
         delta1 = range1[1] - range1[0]
         delta2 = range2[1] - range2[0]
@@ -372,22 +390,37 @@ class EnergyPlusEnv(gym.Env):
 if __name__ == "__main__":
     args = parse_args()
 
+    ray.init()
+
     # Ray configuration. See Ray docs for tuning
-    config = {
-        "env": EnergyPlusEnv,
-        "framework": args.framework,
-        "num_workers": args.num_workers,
-        "gamma": 0.99,
-        "model": {
-            "use_lstm": args.use_lstm
-        },
-        "env_config": vars(args)
-    }
-    if args.framework == "tf2":
-        config["eager_tracing"] = "true"
+    config = (
+        PPOConfig()
+        .environment(
+            env=EnergyPlusEnv,
+            env_config=vars(args)
+        )
+        .training(
+            gamma=0.95,
+            lr=0.01,
+            kl_coeff=0.3,
+            train_batch_size=1024,
+            sgd_minibatch_size=128,
+            model={"use_lstm": args.use_lstm}
+        )
+        .framework(
+            framework=args.framework,
+            eager_tracing=args.framework == "tf2"
+        )
+        .resources(num_gpus=0)
+        .rollouts(num_rollout_workers=args.num_workers)
+    )
 
-    stop = {
-        "timesteps_total": args.timesteps
-    }
+    print("PPO config:", config.to_dict())
 
-    tune.run(args.alg, stop=stop, config=config, verbose=2)
+    tune.Tuner(
+        "PPO",
+        run_config=air.RunConfig(stop={"timesteps_total": args.timesteps}),
+        param_space=config.to_dict(),
+    ).fit()
+
+    ray.shutdown()

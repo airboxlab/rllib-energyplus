@@ -1,3 +1,5 @@
-ray[rllib]==2.0.0
-gym==0.21.0
-numpy==1.23.1
+ray[rllib]==2.3.0
+gymnasium
+numpy==1.23.5
+tensorflow==2.9.0
+tensorflow-probability==0.14.1
