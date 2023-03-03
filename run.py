@@ -333,7 +333,7 @@ class EnergyPlusEnv(gym.Env):
         )
         self.energyplus_runner.start()
 
-        # wait for E+ warmup do be complete
+        # wait for E+ warmup to complete
         if not self.energyplus_runner.initialized:
             self.energyplus_runner.init_queue.get()
 
@@ -365,7 +365,7 @@ class EnergyPlusEnv(gym.Env):
         # timeout is set to 2s to handle start and end of simulation cases, which happens async
         # and materializes by worker thread waiting on this queue (EnergyPlus callback
         # not consuming yet/anymore)
-        # timeout value can be increased if E+ warmup period is longer
+        # timeout value can be increased if E+ warmup period is longer or if step takes longer
         timeout = 2
         try:
             self.act_queue.put(sat_spt_value, timeout=timeout)
@@ -374,6 +374,8 @@ class EnergyPlusEnv(gym.Env):
             done = True
             obs = self.last_obs
 
+        # this won't always work (reason for queue timeout), as simulation
+        # sometimes ends with last reported progress at 99%.
         if self.energyplus_runner.progress_value == 100:
             print("reached end of simulation")
             done = True
