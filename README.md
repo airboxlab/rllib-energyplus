@@ -2,7 +2,7 @@
 
 An example of how to train a control policy using Ray RLlib and EnergyPlus Python API.
 
-Requires EnergyPlus 9.3+
+Requires Python 3.8+, EnergyPlus 9.3+
 
 ## Setup
 
