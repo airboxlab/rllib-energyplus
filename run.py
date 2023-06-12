@@ -89,7 +89,8 @@ class EnergyPlusRunner:
         self.energyplus_state: Any = None
         self.sim_results: Dict[str, Any] = {}
         self.initialized = False
-        self.init_queue = Queue()
+        self.warmup_complete = False
+        self.warmup_queue = Queue()
         self.progress_value: int = 0
         self.simulation_complete = False
 
@@ -132,10 +133,18 @@ class EnergyPlusRunner:
         runtime = self.energyplus_api.runtime
 
         # register callback used to track simulation progress
-        def report_progress(progress: int) -> None:
+        def _report_progress(progress: int) -> None:
             self.progress_value = progress
+            print(f"Simulation progress: {self.progress_value}%")
 
-        runtime.callback_progress(self.energyplus_state, report_progress)
+        runtime.callback_progress(self.energyplus_state, _report_progress)
+
+        def _warmup_complete(state: Any) -> None:
+            self.warmup_complete = True
+            self.warmup_queue.put(True)
+
+        # register callback used to signal warmup complete
+        runtime.callback_after_new_environment_warmup_complete(self.energyplus_state, _warmup_complete)
 
         # register callback used to collect observations
         runtime.callback_end_zone_timestep_after_zone_reporting(self.energyplus_state, self._collect_obs)
@@ -149,6 +158,7 @@ class EnergyPlusRunner:
 
             # start simulation
             results["exit_code"] = runtime.run_energyplus(state, cmd_args)
+            self.simulation_complete = True
 
         self.energyplus_exec_thread = threading.Thread(
             target=_run_energyplus,
@@ -218,6 +228,7 @@ class EnergyPlusRunner:
 
         if self.act_queue.empty():
             return
+
         next_action = self.act_queue.get()
         assert isinstance(next_action, float)
 
@@ -270,7 +281,6 @@ class EnergyPlusRunner:
                     )
                     exit(1)
 
-            self.init_queue.put("")
             self.initialized = True
 
         return True
@@ -334,8 +344,8 @@ class EnergyPlusEnv(gym.Env):
         self.energyplus_runner.start()
 
         # wait for E+ warmup to complete
-        if not self.energyplus_runner.initialized:
-            self.energyplus_runner.init_queue.get()
+        if not self.energyplus_runner.warmup_complete:
+            self.energyplus_runner.warmup_queue.get()
 
         try:
             obs = self.obs_queue.get()
@@ -353,32 +363,32 @@ class EnergyPlusEnv(gym.Env):
             print(f"EnergyPlus failed with {self.energyplus_runner.sim_results['exit_code']}")
             exit(1)
 
-        # rescale agent decision to actuator range
-        sat_spt_value = self._rescale(
-            n=int(action),  # noqa
-            range1=(0, self.action_space.n),
-            range2=(15, 30)
-        )
-
-        # enqueue action (received by EnergyPlus through dedicated callback)
-        # then wait to get next observation.
-        # timeout is set to 2s to handle start and end of simulation cases, which happens async
-        # and materializes by worker thread waiting on this queue (EnergyPlus callback
-        # not consuming yet/anymore)
-        # timeout value can be increased if E+ warmup period is longer or if step takes longer
-        timeout = 2
-        try:
-            self.act_queue.put(sat_spt_value, timeout=timeout)
-            self.last_obs = obs = self.obs_queue.get(timeout=timeout)
-        except (Full, Empty):
+        # simulation_complete is likely to happen after last env step()
+        # is called, hence leading to waiting on queue for a timeout
+        if self.energyplus_runner.simulation_complete:
             done = True
             obs = self.last_obs
+        else:
+            # rescale agent decision to actuator range
+            sat_spt_value = self._rescale(
+                n=int(action),  # noqa
+                range1=(0, self.action_space.n),
+                range2=(15, 30)
+            )
 
-        # this won't always work (reason for queue timeout), as simulation
-        # sometimes ends with last reported progress at 99%.
-        if self.energyplus_runner.progress_value == 100:
-            print("reached end of simulation")
-            done = True
+            # enqueue action (received by EnergyPlus through dedicated callback)
+            # then wait to get next observation.
+            # timeout is set to 2s to handle end of simulation cases, which happens async
+            # and materializes by worker thread waiting on this queue (EnergyPlus callback
+            # not consuming yet/anymore)
+            # timeout value can be increased if E+ timestep takes longer
+            timeout = 2
+            try:
+                self.act_queue.put(sat_spt_value, timeout=timeout)
+                self.last_obs = obs = self.obs_queue.get(timeout=timeout)
+            except (Full, Empty):
+                done = True
+                obs = self.last_obs
 
         # compute reward
         reward = self._compute_reward(obs)
