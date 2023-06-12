@@ -6,7 +6,30 @@ Requires Python 3.8+, EnergyPlus 9.3+
 
 ## Setup
 
-### Package dependencies
+### Using docker image
+
+Build the docker image
+
+```shell
+docker build -t rllib-energyplus .
+```
+
+Run the container
+
+```shell
+docker run --rm --name rllib-energyplus -it rllib-energyplus
+```
+
+Inside the container, run the experiment
+
+```shell
+cd /root/rllib-energyplus
+python3 run.py --idf model.idf --epw LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw --framework torch
+```
+
+### Using virtual environment
+
+#### Package dependencies
 
 Edit `requirements.txt` and add the deep learning framework of your choice (TensorFlow or PyTorch)
 
@@ -16,7 +39,7 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
-### Path dependencies
+#### Path dependencies
 
 Add EnergyPlus folder to `PYTHONPATH` environment variable:
 
