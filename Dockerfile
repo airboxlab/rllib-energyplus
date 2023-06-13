@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 
+LABEL org.opencontainers.image.source="https://github.com/airboxlab/rllib-energyplus"
+
 ARG EPLUS_VERSION=22-2-0
 ARG EPLUS_DL_URL=https://github.com/NREL/EnergyPlus/releases/download/v22.2.0/EnergyPlus-22.2.0-c249759bad-Linux-Ubuntu20.04-x86_64.sh
 ENV ENERGYPLUS_DOWNLOAD_URL=${ENERGYPLUS_DOWNLOAD_URL} \
