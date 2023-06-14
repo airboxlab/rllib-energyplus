@@ -2,17 +2,17 @@ FROM ubuntu:22.04
 
 LABEL org.opencontainers.image.source="https://github.com/airboxlab/rllib-energyplus"
 
-ARG EPLUS_VERSION=22-2-0
-ARG EPLUS_DL_URL=https://github.com/NREL/EnergyPlus/releases/download/v22.2.0/EnergyPlus-22.2.0-c249759bad-Linux-Ubuntu20.04-x86_64.sh
-ENV ENERGYPLUS_DOWNLOAD_URL=${ENERGYPLUS_DOWNLOAD_URL} \
-    DEBIAN_FRONTEND=noninteractive \
+ARG EPLUS_VERSION=23-1-0
+ARG EPLUS_DL_URL=https://github.com/NREL/EnergyPlus/releases/download/v23.1.0/EnergyPlus-23.1.0-87ed9199d4-Linux-Ubuntu22.04-x86_64.sh
+
+ENV DEBIAN_FRONTEND=noninteractive \
     HOME=/home/ray \
     TZ=UTC
 
 USER root
 SHELL ["/bin/bash", "-c"]
 
-COPY requirements.txt model.idf LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw run.py /root/rllib-energyplus/
+COPY requirements.txt /root/rllib-energyplus/
 
 RUN \
     # install E+
@@ -33,6 +33,8 @@ RUN \
     pip install --no-cache-dir -r requirements.txt && \
     # cleanup
     apt autoremove -qq -y && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
+
+COPY model.idf LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw run.py /root/rllib-energyplus/
 
 ENV PYTHONPATH="/usr/local/EnergyPlus-${EPLUS_VERSION}"
 ENTRYPOINT "/bin/bash"
