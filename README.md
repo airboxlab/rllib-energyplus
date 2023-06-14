@@ -67,3 +67,14 @@ python3 run.py \
 Example of episode reward stats obtained training with PPO, 1e6 timesteps, 2 workers, untuned. Experiment took ~1h45min
 
 ![PPO stats](images/ppo_untuned.png "PPO training - Single AHU model")
+
+## Tracking an experiment
+
+Tensorboard is installed with requirements. 
+To track an experiment running in a docker container, the container must be started with `--network host` parameter. 
+
+Start tensorboard with:
+
+```shell
+tensorboard --logdir ~/ray_results --bind_all
+```
