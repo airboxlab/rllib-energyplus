@@ -64,7 +64,7 @@ python3 run.py \
   --epw /path/to/LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw
 ```
 
-Example of episode reward stats obtained training with PPO, 1e5 timesteps, 2 workers, with default parameters + LSTM. 
+Example of episode reward stats obtained training with PPO, 1e5 timesteps, 2 workers, with default parameters + LSTM, short E+ run period (2 first weeks of January). 
 Experiment took ~20min.
 
 ![PPO stats](images/ppo_untuned.png "PPO training - Single AHU model")
