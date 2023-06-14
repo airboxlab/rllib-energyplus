@@ -1,4 +1,4 @@
-# Ray RLlib - EnergyPlus Python API sample
+# Ray RLlib - EnergyPlus Python API integration
 
 An example of how to train a control policy using Ray RLlib and EnergyPlus Python API.
 
