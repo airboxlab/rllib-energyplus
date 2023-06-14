@@ -440,11 +440,14 @@ if __name__ == "__main__":
         )
         .training(
             gamma=0.95,
-            lr=0.01,
+            lr=0.003,
             kl_coeff=0.3,
-            train_batch_size=1024,
+            train_batch_size=4000,
             sgd_minibatch_size=128,
-            model={"use_lstm": args.use_lstm}
+            vf_loss_coeff=0.01,
+            model={"use_lstm": args.use_lstm},
+            # TODO: enable learner API once LSTM / Attention nets are supported
+            _enable_learner_api=False
         )
         .framework(
             framework=args.framework,

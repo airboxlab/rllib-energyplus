@@ -1,9 +1,10 @@
-ray[rllib]==2.3.0
+ray[rllib]==2.5.0
 gymnasium
 numpy==1.23.5
 protobuf==3.19.4
+tensorboard
 tensorflow-probability==0.14.1
 # uncomment to add tensorflow
 # tensorflow==2.9.0
 # uncomment to add pytorch
-torch==1.12.1
+torch==2.0.1

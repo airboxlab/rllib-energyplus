@@ -46,7 +46,7 @@ pip install -r requirements.txt
 Add EnergyPlus folder to `PYTHONPATH` environment variable:
 
 ```shell
-export PYTHONPATH="/usr/local/EnergyPlus-22-1-0/:$PYTHONPATH"
+export PYTHONPATH="/usr/local/EnergyPlus-23-1-0/:$PYTHONPATH"
 ```
 
 Make sure you can import EnergyPlus API by printing its version number
@@ -64,6 +64,18 @@ python3 run.py \
   --epw /path/to/LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw
 ```
 
-Example of episode reward stats obtained training with PPO, 1e6 timesteps, 2 workers, untuned. Experiment took ~1h45min
+Example of episode reward stats obtained training with PPO, 1e5 timesteps, 2 workers, with default parameters + LSTM. 
+Experiment took ~20min.
 
 ![PPO stats](images/ppo_untuned.png "PPO training - Single AHU model")
+
+## Tracking an experiment
+
+Tensorboard is installed with requirements. 
+To track an experiment running in a docker container, the container must be started with `--network host` parameter. 
+
+Start tensorboard with:
+
+```shell
+tensorboard --logdir ~/ray_results --bind_all
+```
