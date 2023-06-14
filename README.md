@@ -46,7 +46,7 @@ pip install -r requirements.txt
 Add EnergyPlus folder to `PYTHONPATH` environment variable:
 
 ```shell
-export PYTHONPATH="/usr/local/EnergyPlus-22-1-0/:$PYTHONPATH"
+export PYTHONPATH="/usr/local/EnergyPlus-23-1-0/:$PYTHONPATH"
 ```
 
 Make sure you can import EnergyPlus API by printing its version number
