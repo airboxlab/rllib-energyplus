@@ -1,0 +1,51 @@
+name: RLlib EnergyPlus Tests
+description:
+  Performs basic integrity tests. Doesn't run training tests as 2+ CPUs are needed to run Ray RLlib.
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+
+  unit-tests:
+    name: Test RLlib EnergyPlus
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install keyring keyrings.alt
+          pip install -r requirements.txt
+
+      - name: Install EnergyPlus
+        run: |
+          ENERGYPLUS_VERSION="23.1.0"
+          ENERGYPLUS_SHA="87ed9199d4"
+          ENERGYPLUS_DOWNLOAD_URL="https://github.com/NREL/EnergyPlus/releases/download/v${ENERGYPLUS_VERSION}/EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_SHA}-Linux-Ubuntu22.04-x86_64.sh"
+          wget --quiet "${ENERGYPLUS_DOWNLOAD_URL}"
+          export eplus_install="$(echo "${ENERGYPLUS_DOWNLOAD_URL}" | rev | cut -d'/' -f1 | rev)"
+          (echo "y"; echo ""; echo "y";) | sudo bash "$eplus_install"
+
+      - name: Execute tests
+        env:
+          PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
+        run: |
+          python tests/__init__.py

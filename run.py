@@ -394,6 +394,10 @@ class EnergyPlusEnv(gym.Env):
         obs_vec = np.array(list(obs.values()))
         return obs_vec, reward, done, False, {}
 
+    def close(self):
+        if self.energyplus_runner is not None:
+            self.energyplus_runner.stop()
+
     def render(self, mode="human"):
         pass
 
