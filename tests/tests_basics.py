@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from run import EnergyPlusEnv
+from rllibenergyplus.run import EnergyPlusEnv
 
 
 class TestEnv(unittest.TestCase):
