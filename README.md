@@ -10,7 +10,7 @@ Requires Python 3.8+, EnergyPlus 9.3+
 
 Look for a pre-built docker image in [packages](https://github.com/airboxlab/rllib-energyplus/pkgs/container/rllib-energyplus) and follow instructions to pull it.
 
-Alternatively, build the docker image
+Alternatively, build the docker image in `docker/` folder:
 
 ```shell
 docker build -t rllib-energyplus .
@@ -26,7 +26,7 @@ Inside the container, run the experiment
 
 ```shell
 cd /root/rllib-energyplus
-python3 run.py --idf model.idf --epw LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw --framework torch
+python3 rllibenergyplus/run.py --idf model.idf --epw LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw --framework torch
 ```
 
 ### Using virtual environment
@@ -59,7 +59,7 @@ $ python3 -c 'from pyenergyplus.api import EnergyPlusAPI; print(EnergyPlusAPI.ap
 ## Run example
 
 ```shell
-python3 run.py \
+python3 rllibenergyplus/run.py \
   --idf /path/to/model.idf \
   --epw /path/to/LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw
 ```
