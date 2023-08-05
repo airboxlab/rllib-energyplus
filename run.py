@@ -272,14 +272,13 @@ class EnergyPlusRunner:
             ]:
                 if any([v == -1 for v in handles.values()]):
                     available_data = self.x.list_available_api_data_csv(state_argument).decode('utf-8')
-                    print(
+                    raise RuntimeError(
                         f"got -1 handle, check your var/meter/actuator names:\n"
                         f"> variables: {self.var_handles}\n"
                         f"> meters: {self.meter_handles}\n"
                         f"> actuators: {self.actuator_handles}\n"
                         f"> available E+ API data: {available_data}"
                     )
-                    exit(1)
 
             self.initialized = True
 
@@ -360,8 +359,7 @@ class EnergyPlusEnv(gym.Env):
 
         # check for simulation errors
         if self.energyplus_runner.failed():
-            print(f"EnergyPlus failed with {self.energyplus_runner.sim_results['exit_code']}")
-            exit(1)
+            raise RuntimeError(f"EnergyPlus failed with {self.energyplus_runner.sim_results['exit_code']}")
 
         # simulation_complete is likely to happen after last env step()
         # is called, hence leading to waiting on queue for a timeout
@@ -428,6 +426,9 @@ class EnergyPlusEnv(gym.Env):
 
 if __name__ == "__main__":
     args = parse_args()
+
+    # uncomment to check if env is serializable
+    # ray.util.inspect_serializability(EnergyPlusEnv({}))
 
     ray.init()
 
