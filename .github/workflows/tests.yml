@@ -1,6 +1,4 @@
 name: RLlib EnergyPlus Tests
-description:
-  Performs basic integrity tests. Doesn't run training tests as 2+ CPUs are needed to run Ray RLlib.
 on:
   push:
     branches:
