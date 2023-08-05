@@ -26,7 +26,7 @@ Inside the container, run the experiment
 
 ```shell
 cd /root/rllib-energyplus
-python3 run.py --idf model.idf --epw LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw --framework torch
+python3 rllibenergyplus/run.py --idf model.idf --epw LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw --framework torch
 ```
 
 ### Using virtual environment
