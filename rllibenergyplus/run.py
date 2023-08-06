@@ -96,8 +96,6 @@ class EnergyPlusRunner:
         self.energyplus_state: Any = None
         self.sim_results: Dict[str, Any] = {}
         self.initialized = False
-        self.warmup_complete = False
-        self.warmup_queue = Queue()
         self.progress_value: int = 0
         self.simulation_complete = False
 
@@ -145,13 +143,6 @@ class EnergyPlusRunner:
             print(f"Simulation progress: {self.progress_value}%")
 
         runtime.callback_progress(self.energyplus_state, _report_progress)
-
-        def _warmup_complete(state: Any) -> None:
-            self.warmup_complete = True
-            self.warmup_queue.put(True)
-
-        # register callback used to signal warmup complete
-        runtime.callback_after_new_environment_warmup_complete(self.energyplus_state, _warmup_complete)
 
         # register callback used to collect observations
         runtime.callback_end_zone_timestep_after_zone_reporting(self.energyplus_state, self._collect_obs)
@@ -354,11 +345,7 @@ class EnergyPlusEnv(gym.Env):
         )
         self.energyplus_runner.start()
 
-        # wait for E+ warmup to complete
-        if not self.energyplus_runner.warmup_complete:
-            self.energyplus_runner.warmup_queue.get()
-
-        # wait until E+ is ready to receive actions
+        # wait until E+ is ready.
         obs = self.obs_queue.get()
         self.last_obs = obs
         return np.array(list(obs.values())), {}
