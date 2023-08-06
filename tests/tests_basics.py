@@ -25,3 +25,9 @@ class TestEnv(unittest.TestCase):
         self.assertFalse(done)
 
         env.close()
+
+    def test_env_serializable(self):
+        import ray
+
+        serializable, _ = ray.util.inspect_serializability(EnergyPlusEnv({}))
+        self.assertTrue(serializable)
