@@ -167,7 +167,6 @@ class EnergyPlusRunner:
             results["exit_code"] = runtime.run_energyplus(state, cmd_args)
 
             if not self.simulation_complete:
-                self.simulation_complete = True
                 # free consumers from waiting
                 self.obs_queue.put(None)
                 self.act_queue.put(None)
