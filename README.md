@@ -1,3 +1,5 @@
+[![RLlib EnergyPlus Tests](https://github.com/airboxlab/rllib-energyplus/actions/workflows/tests.yml/badge.svg)](https://github.com/airboxlab/rllib-energyplus/actions/workflows/tests.yml)
+
 # Ray RLlib - EnergyPlus Python API integration
 
 An example of how to train a control policy using Ray RLlib and EnergyPlus Python API.
