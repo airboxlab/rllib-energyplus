@@ -1,6 +1,7 @@
 import argparse
 import os
 import threading
+from queue import Queue, Empty, Full
 from tempfile import TemporaryDirectory
 from typing import Dict, Any, Tuple, Optional, List
 
@@ -8,11 +9,11 @@ import gymnasium as gym
 import numpy as np
 import ray
 from gymnasium.spaces import Discrete
-from pyenergyplus.api import EnergyPlusAPI
-from pyenergyplus.datatransfer import DataExchange
 from ray import tune, air
 from ray.rllib.algorithms.ppo import PPOConfig
-from queue import Queue, Empty, Full
+
+from pyenergyplus.api import EnergyPlusAPI
+from pyenergyplus.datatransfer import DataExchange
 
 
 def parse_args() -> argparse.Namespace:
@@ -51,6 +52,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=2,
         help="The number of workers to use",
+    )
+    parser.add_argument(
+        "--num-gpus",
+        type=int,
+        default=0,
+        help="The number of GPUs to use",
     )
     parser.add_argument(
         "--alg",
@@ -158,7 +165,13 @@ class EnergyPlusRunner:
 
             # start simulation
             results["exit_code"] = runtime.run_energyplus(state, cmd_args)
-            self.simulation_complete = True
+
+            if not self.simulation_complete:
+                self.simulation_complete = True
+                # free consumers from waiting
+                self.obs_queue.put(None)
+                self.act_queue.put(None)
+                self.stop()
 
         self.energyplus_exec_thread = threading.Thread(
             target=_run_energyplus,
@@ -172,7 +185,7 @@ class EnergyPlusRunner:
         self.energyplus_exec_thread.start()
 
     def stop(self) -> None:
-        if self.energyplus_exec_thread:
+        if not self.simulation_complete:
             self.simulation_complete = True
             self._flush_queues()
             self.energyplus_exec_thread.join()
@@ -241,7 +254,7 @@ class EnergyPlusRunner:
     def _init_callback(self, state_argument) -> bool:
         """initialize EnergyPlus handles and checks if simulation runtime is ready"""
         self.initialized = self._init_handles(state_argument) \
-            and not self.x.warmup_flag(state_argument)
+                           and not self.x.warmup_flag(state_argument)
         return self.initialized
 
     def _init_handles(self, state_argument):
@@ -346,11 +359,9 @@ class EnergyPlusEnv(gym.Env):
         if not self.energyplus_runner.warmup_complete:
             self.energyplus_runner.warmup_queue.get()
 
-        try:
-            obs = self.obs_queue.get()
-        except Empty:
-            obs = self.last_obs
-
+        # wait until E+ is ready to receive actions
+        obs = self.obs_queue.get()
+        self.last_obs = obs
         return np.array(list(obs.values())), {}
 
     def step(self, action):
@@ -458,7 +469,7 @@ if __name__ == "__main__":
             framework=args.framework,
             eager_tracing=args.framework == "tf2"
         )
-        .resources(num_gpus=0)
+        .resources(num_gpus=args.num_gpus)
         .rollouts(num_rollout_workers=args.num_workers)
     )
 
@@ -466,7 +477,10 @@ if __name__ == "__main__":
 
     tune.Tuner(
         "PPO",
-        run_config=air.RunConfig(stop={"timesteps_total": args.timesteps}),
+        run_config=air.RunConfig(
+            stop={"timesteps_total": args.timesteps},
+            failure_config=air.FailureConfig(max_failures=0, fail_fast=True),
+        ),
         param_space=config.to_dict(),
     ).fit()
 
