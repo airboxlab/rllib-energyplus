@@ -38,9 +38,8 @@ jobs:
           ENERGYPLUS_VERSION="23.1.0"
           ENERGYPLUS_SHA="87ed9199d4"
           ENERGYPLUS_DOWNLOAD_URL="https://github.com/NREL/EnergyPlus/releases/download/v${ENERGYPLUS_VERSION}/EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_SHA}-Linux-Ubuntu22.04-x86_64.sh"
-          wget --quiet "${ENERGYPLUS_DOWNLOAD_URL}"
-          export eplus_install="$(echo "${ENERGYPLUS_DOWNLOAD_URL}" | rev | cut -d'/' -f1 | rev)"
-          (echo "y"; echo ""; echo "y";) | sudo bash "$eplus_install"
+          wget --quiet "${ENERGYPLUS_DOWNLOAD_URL}" -O /tmp/eplus_install.sh
+          (echo "y"; echo ""; echo "y";) | sudo bash /tmp/eplus_install.sh
 
       - name: Execute tests
         env:
