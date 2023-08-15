@@ -1,7 +1,7 @@
 ray[rllib]==2.5.0
 gymnasium
 numpy==1.23.5
-protobuf==3.19.4
+protobuf==3.19.5
 tensorboard
 tensorflow-probability==0.14.1
 # uncomment to add tensorflow
