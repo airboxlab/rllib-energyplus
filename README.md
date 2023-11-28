@@ -12,10 +12,10 @@ Requires Python 3.8+, EnergyPlus 9.3+
 
 Look for a pre-built docker image in [packages](https://github.com/airboxlab/rllib-energyplus/pkgs/container/rllib-energyplus) and follow instructions to pull it.
 
-Alternatively, build the docker image in `docker/` folder:
+Alternatively, build the docker image:
 
 ```shell
-docker build -t rllib-energyplus .
+docker build . -f docker/Dockerfile -t rllib-energyplus
 ```
 
 Run the container
