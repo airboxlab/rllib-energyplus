@@ -119,7 +119,7 @@ class EnergyPlusRunner:
             # HVAC elec (J)
             "elec": "Electricity:HVAC",
             # District heating (J)
-            "dh": "Heating:DistrictHeating"
+            "dh": "Heating:DistrictHeatingWater"
         }
         self.meter_handles: Dict[str, int] = {}
 
@@ -447,16 +447,24 @@ if __name__ == "__main__":
             train_batch_size=4000,
             sgd_minibatch_size=128,
             vf_loss_coeff=0.01,
-            model={"use_lstm": args.use_lstm},
-            # TODO: enable learner API once LSTM / Attention nets are supported
-            _enable_learner_api=False
+            use_critic=True,
+            use_gae=True,
+            model={
+                "use_lstm": args.use_lstm,
+                "vf_share_layers": False,
+            },
+            _enable_learner_api=True,
         )
+        .rl_module(_enable_rl_module_api=True)
         .framework(
             framework=args.framework,
-            eager_tracing=args.framework == "tf2"
+            eager_tracing=args.framework == "tf2",
         )
         .resources(num_gpus=args.num_gpus)
-        .rollouts(num_rollout_workers=args.num_workers)
+        .rollouts(
+            num_rollout_workers=args.num_workers,
+            rollout_fragment_length="auto",
+        )
     )
 
     print("PPO config:", config.to_dict())
