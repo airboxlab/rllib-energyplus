@@ -24,9 +24,10 @@ Run the container
 docker run --rm --name rllib-energyplus -it rllib-energyplus
 ```
 
-If you want to use tensorboard, start the container with `--network host` parameter.
-
-If you want to use a GPU, start the container with `--gpus all` parameter.
+Notes:
+- Remove `--rm` to keep the container after exiting.
+- If you want to use tensorboard, start the container with `--network host` parameter.
+- If you want to use a GPU, start the container with `--gpus all` parameter.
 
 Inside the container, run the experiment
 
