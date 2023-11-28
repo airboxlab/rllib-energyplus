@@ -1,4 +1,4 @@
-ray[rllib]==2.5.0
+ray[rllib]==2.8.0
 gymnasium
 numpy==1.23.5
 protobuf==3.20.3

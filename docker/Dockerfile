@@ -1,9 +1,10 @@
 FROM ubuntu:22.04
 
 LABEL org.opencontainers.image.source="https://github.com/airboxlab/rllib-energyplus"
+LABEL org.opencontainers.image.description="RLlib + EnergyPlus for Reinforcement Learning in Building Energy Management Systems"
 
-ARG EPLUS_VERSION=23-1-0
-ARG EPLUS_DL_URL=https://github.com/NREL/EnergyPlus/releases/download/v23.1.0/EnergyPlus-23.1.0-87ed9199d4-Linux-Ubuntu22.04-x86_64.sh
+ARG EPLUS_VERSION=23-2-0
+ARG EPLUS_DL_URL=https://github.com/NREL/EnergyPlus/releases/download/v23.2.0/EnergyPlus-23.2.0-7636e6b3e9-Linux-Ubuntu22.04-x86_64.sh
 
 ENV DEBIAN_FRONTEND=noninteractive \
     HOME=/home/ray \
@@ -34,7 +35,8 @@ RUN \
     # cleanup
     apt autoremove -qq -y && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
 
-COPY model.idf LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw run.py /root/rllib-energyplus/
+COPY model.idf LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw /root/rllib-energyplus/
+COPY rllibenergyplus /root/rllib-energyplus/rllibenergyplus
 
 ENV PYTHONPATH="/usr/local/EnergyPlus-${EPLUS_VERSION}"
 ENTRYPOINT "/bin/bash"

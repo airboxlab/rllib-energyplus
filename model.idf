@@ -1,4 +1,4 @@
-  Version,22.2;
+  Version,23.2;
 
   Timestep,4;
 
@@ -801,7 +801,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Schedule:Constant,Always On Discrete,,1;
 
@@ -877,7 +884,8 @@
     Outdoor CO2 schedule;    !- Outdoor Carbon Dioxide Schedule Name
 
   ZoneAirHeatBalanceAlgorithm,
-    ThirdOrderBackwardDifference;  !- Algorithm
+    ThirdOrderBackwardDifference,  !- Algorithm
+    No;                      !- Do Space Heat Balance for Sizing
 
   ZoneCapacitanceMultiplier:ResearchSpecial,
     Zone Capacitance Multiplier Research Special,  !- Name
@@ -8425,12 +8433,12 @@
   Branch,
     Hot Water Loop Supply Branch 1,  !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     District Heating,        !- Component 1 Name
     Node 14,                 !- Component 1 Inlet Node Name
     Node 17;                 !- Component 1 Outlet Node Name
 
-  DistrictHeating,
+  DistrictHeating:Water,
     District Heating,        !- Name
     Node 14,                 !- Hot Water Inlet Node Name
     Node 17,                 !- Hot Water Outlet Node Name
@@ -8538,7 +8546,7 @@
 
   PlantEquipmentList,
     Hot Water Loop Heating Equipment List,  !- Name
-    DistrictHeating,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     District Heating;        !- Equipment 1 Name
 
   OutputControl:ReportingTolerances,
@@ -8685,12 +8693,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     189.1-2009 - SecSchl - Auditorium - CZ4-8 Infiltration 77.0 percent reduction,  !- Name
-    189.1-2009 - SecSchl - Auditorium - CZ4-8,  !- Zone or ZoneList Name
+    189.1-2009 - SecSchl - Auditorium - CZ4-8,  !- Zone or ZoneList or Space or SpaceList Name
     SecondarySchool Infil,   !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    5.211064e-05,            !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    5.211064e-05,            !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     -0.1,                    !- Temperature Term Coefficient
@@ -8711,7 +8719,7 @@
 
   Output:Meter,Fans:Electricity,TimeStep;
 
-  Output:Meter,Heating:DistrictHeating,TimeStep;
+  Output:Meter,Heating:DistrictHeatingWater,TimeStep;
 
   Output:Meter,HeatingCoils:EnergyTransfer,TimeStep;
 
@@ -8745,3 +8753,4 @@
     Construction,            !- Category
     0,                       !- Cost
     ServicePeriod;           !- Start of Costs
+

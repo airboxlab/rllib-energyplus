@@ -24,6 +24,10 @@ Run the container
 docker run --rm --name rllib-energyplus -it rllib-energyplus
 ```
 
+If you want to use tensorboard, start the container with `--network host` parameter.
+
+If you want to use a GPU, start the container with `--gpus all` parameter.
+
 Inside the container, run the experiment
 
 ```shell
@@ -48,7 +52,7 @@ pip install -r requirements.txt
 Add EnergyPlus folder to `PYTHONPATH` environment variable:
 
 ```shell
-export PYTHONPATH="/usr/local/EnergyPlus-23-1-0/:$PYTHONPATH"
+export PYTHONPATH="/usr/local/EnergyPlus-23-2-0/:$PYTHONPATH"
 ```
 
 Make sure you can import EnergyPlus API by printing its version number
