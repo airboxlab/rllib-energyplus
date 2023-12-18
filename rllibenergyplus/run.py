@@ -262,15 +262,17 @@ class EnergyPlusRunner:
         # (number varies on each iteration). We should send actions at least once per zone timestep, so we can
         # resend the last action if we are iterating over system timesteps, but we need to wait for a new action
         # when moving from one zone timestep to another.
-        with self.act_queue_mutex:
-            sys_timestep_duration = self.x.system_time_step(state_argument)
-            if (
-                sys_timestep_duration < self.zone_timestep_duration
-                and self.act_queue.empty()
-            ):
-                self.act_queue.put(self.last_action)
+        sys_timestep_duration = self.x.system_time_step(state_argument)
+        if (
+            sys_timestep_duration < self.zone_timestep_duration
+            and self.act_queue.empty()
+        ):
+            self.act_queue.put(self.last_action)
 
-            # wait for next action
+        # wait for next action
+        with self.act_queue_mutex:
+            if self.simulation_complete:
+                return
             next_action = self.act_queue.get()
 
         # end of simulation
@@ -339,9 +341,8 @@ class EnergyPlusRunner:
 
     def _flush_queues(self):
         # release waiting threads (if any)
-        with self.act_queue_mutex:
-            if self.act_queue.empty():
-                self.act_queue.put(None)
+        if self.act_queue.empty():
+            self.act_queue.put(None)
 
         while not self.obs_queue.empty():
             self.obs_queue.get()
