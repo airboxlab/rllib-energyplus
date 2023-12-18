@@ -271,6 +271,8 @@ class EnergyPlusRunner:
 
         # wait for next action
         with self.act_queue_mutex:
+            if self.simulation_complete:
+                return
             next_action = self.act_queue.get()
 
         # end of simulation
