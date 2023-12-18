@@ -11,7 +11,9 @@ class TestEnv(unittest.TestCase):
         env = EnergyPlusEnv({
             "idf": f"{root_dir}/model.idf",
             "epw": f"{root_dir}/LUX_LU_Luxembourg.AP.065900_TMYx.2004-2018.epw",
-            "output": "/tmp/tests_output"
+            "output": "/tmp/tests_output",
+            "verbose": True,
+            "eplus_timestep_duration": 0.25,
         })
 
         obs, _ = env.reset()
