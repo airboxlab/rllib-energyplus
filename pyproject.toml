@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "rl-energyplus"
+version = "0.6.0"
+description = "Reinforcement Learning Gym Environment for EnergyPlus"
+authors = ["Antoine Galataud <antoine@foobot.io>"]
+packages = [
+    { include = "rleplus" },
+]
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+ray = { version = "2.8.0", extras = ["default", "rllib"] }
+gymnasium = "0.28.1"
+numpy = "1.23.5"
+protobuf = "3.20.3"
+tensorboard = "^2.9.0"
+torch = "^2.1.1"
+
+[tool.poetry.scripts]
+rllib = "rleplus.train.rllib:main"
+tests = "tests:run"
+
+[build-system]
+requires = ["setuptools", "poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

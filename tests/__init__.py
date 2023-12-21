@@ -1,8 +1,8 @@
 import sys
-from unittest import defaultTestLoader, TextTestRunner
+from unittest import TextTestRunner, defaultTestLoader
 
-test_suite = defaultTestLoader.discover("tests")
-result = TextTestRunner(verbosity=2).run(test_suite)
 
-if exit:
+def run():
+    test_suite = defaultTestLoader.discover(__name__)
+    result = TextTestRunner(verbosity=2).run(test_suite)
     sys.exit(not result.wasSuccessful())
