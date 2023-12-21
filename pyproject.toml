@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "rl-energyplus"
 version = "0.6.0"
-description = "Reinforcement Learning Gym Environment for EnergyPlus"
+description = "EnergyPlus Gym Environments for Reinforcement Learning"
 authors = ["Antoine Galataud <antoine@foobot.io>"]
 packages = [
     { include = "rleplus" },
