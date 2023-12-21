@@ -31,10 +31,6 @@ jobs:
           python-version: "3.10"
           cache: "poetry"
 
-      - name: Install python dependencies
-        run: |
-          poetry install
-
       - name: Install EnergyPlus
         run: |
           ENERGYPLUS_VERSION="23.2.0"
