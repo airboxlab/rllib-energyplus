@@ -15,22 +15,9 @@ def try_import_energyplus_api(do_import: bool = True):
     try:
         import pyenergyplus  # noqa
     except ImportError:
-        eplus_path: Optional[str] = None
-
-        if (eplus_home := os.getenv("ENERGYPLUS_HOME", None)) is not None:
-            eplus_path = eplus_home
-
-        elif (eplus_version := os.getenv("ENERGYPLUS_VERSION", None)) is not None:
-            eplus_path = f"/usr/local/EnergyPlus-{eplus_version}"
-
-        else:
-            eplus_installs = glob.glob("/usr/local/EnergyPlus-*", recursive=False)
-            if len(eplus_installs) > 0:
-                eplus_path = sorted(eplus_installs, key=lambda x: tuple([int(s) for s in x.split("-")[-3:]]))[-1]
-
+        eplus_path = solve_energyplus_install_path()
         assert eplus_path is not None, "Couldn't find any E+ installation"
         assert os.path.exists(eplus_path), f"Couldn't find E+ installation at {eplus_path}"
-
         sys.path.append(eplus_path)
 
     try:
@@ -47,6 +34,23 @@ def try_import_energyplus_api(do_import: bool = True):
         )
 
     return None, None, None
+
+
+def solve_energyplus_install_path() -> str:
+    eplus_path: Optional[str] = None
+
+    if (eplus_home := os.getenv("ENERGYPLUS_HOME", None)) is not None:
+        eplus_path = eplus_home
+
+    elif (eplus_version := os.getenv("ENERGYPLUS_VERSION", None)) is not None:
+        eplus_path = f"/usr/local/EnergyPlus-{eplus_version}"
+
+    else:
+        eplus_installs = glob.glob("/usr/local/EnergyPlus-*", recursive=False)
+        if len(eplus_installs) > 0:
+            eplus_path = sorted(eplus_installs, key=lambda x: tuple([int(s) for s in x.split("-")[-3:]]))[-1]
+
+    return eplus_path
 
 
 def override(cls):
