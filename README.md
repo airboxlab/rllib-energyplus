@@ -39,17 +39,17 @@ cd /root/rllib-energyplus
 poetry run
 ```
 
-### Using virtual environment
+### Using a virtual environment
 
-#### Install Poetry
+#### Using poetry
+
+Install Poetry if you don't have it already:
 
 ```shell
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
 See more installation options [here](https://python-poetry.org/docs/#installation).
-
-#### Package dependencies
 
 This project comes with a `pyproject.toml` file that lists all dependencies.
 Packages versions are pinned (in `poetry.lock`) to ensure reproducibility.
@@ -58,19 +58,28 @@ Packages versions are pinned (in `poetry.lock`) to ensure reproducibility.
 poetry install
 ```
 
-#### Path dependencies
+#### Using pip
+
+The poetry lock file is automatically converted to a requirements file, so you can also install dependencies with pip:
+
+```shell
+# Create a virtual environment
+python3 -m venv env
+# Activate the virtual environment
+source env/bin/activate
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Path dependencies
 
 This project depends on the EnergyPlus Python API. An auto-discovery mechanism is used to find the API,
 but in case it fails, you can manually add the path to the API to the `PYTHONPATH` environment variable
 using the following:
 
-````shell
-
-Add EnergyPlus folder to `PYTHONPATH` environment variable:
-
 ```shell
 export PYTHONPATH="/usr/local/EnergyPlus-23-2-0/:$PYTHONPATH"
-````
+```
 
 Make sure you can import EnergyPlus API by printing its version number
 
@@ -83,10 +92,21 @@ $ python3 -c 'from pyenergyplus.api import EnergyPlusAPI; print(EnergyPlusAPI.ap
 
 Run the amphitheater example with default parameters using Ray RLlib PPO algorithm:
 
+### Using Poetry
+
 ```shell
-python3 rleplus/train/rllib.py --env Amphitheater
+poetry run rllib --env AmphitheaterEnv
 ```
 
+### Using Python
+
+If you installed dependencies with pip, you can run the example with:
+
+```shell
+python3 rleplus/train/rllib.py --env AmphitheaterEnv
+```
+
+````shell
 Example of episode reward stats obtained training with PPO, 1e5 timesteps, 2 workers, with default parameters + LSTM, short E+ run period (2 first weeks of January).
 Experiment took ~20min.
 
@@ -108,4 +128,4 @@ Start tensorboard with:
 
 ```shell
 tensorboard --logdir ~/ray_results --bind_all
-```
+````
