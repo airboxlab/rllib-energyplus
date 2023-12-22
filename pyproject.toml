@@ -19,9 +19,11 @@ numpy = "1.23.5"
 protobuf = "3.20.3"
 tensorboard = "^2.9.0"
 torch = "^2.1.1"
+pearl = { git = "https://github.com/facebookresearch/Pearl.git" }
 
 [tool.poetry.scripts]
 rllib = "rleplus.train.rllib:main"
+pearl = "rleplus.train.pearl:main"
 tests = "tests:run"
 
 [build-system]
