@@ -8753,4 +8753,3 @@
     Construction,            !- Category
     0,                       !- Cost
     ServicePeriod;           !- Start of Costs
-
