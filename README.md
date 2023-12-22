@@ -36,7 +36,8 @@ Inside the container, run the experiment
 
 ```shell
 cd /root/rllib-energyplus
-poetry run
+# run the Amphitheater example
+python3 rleplus/train/rllib.py --env AmphitheaterEnv
 ```
 
 ### Using a virtual environment

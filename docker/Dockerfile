@@ -37,5 +37,6 @@ RUN \
 
 COPY rleplus /root/rllib-energyplus/rleplus
 
-ENV PYTHONPATH="/usr/local/EnergyPlus-${EPLUS_VERSION}"
+ENV PYTHONPATH=/root/rllib-energyplus
+
 ENTRYPOINT "/bin/bash"
