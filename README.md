@@ -55,6 +55,8 @@ See more installation options [here](https://python-poetry.org/docs/#installatio
 This project comes with a `pyproject.toml` file that lists all dependencies.
 Packages versions are pinned (in `poetry.lock`) to ensure reproducibility.
 
+Install the project dependencies with:
+
 ```shell
 poetry install
 ```
@@ -107,7 +109,6 @@ If you installed dependencies with pip, you can run the example with:
 python3 rleplus/train/rllib.py --env AmphitheaterEnv
 ```
 
-````shell
 Example of episode reward stats obtained training with PPO, 1e5 timesteps, 2 workers, with default parameters + LSTM, short E+ run period (2 first weeks of January).
 Experiment took ~20min.
 
@@ -129,4 +130,4 @@ Start tensorboard with:
 
 ```shell
 tensorboard --logdir ~/ray_results --bind_all
-````
+```
