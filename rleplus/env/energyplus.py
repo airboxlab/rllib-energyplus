@@ -407,6 +407,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # compute reward
         reward = self.compute_reward(obs)
 
+        # print("obs", obs, "reward", reward, "done", done, "action", action)
         obs_vec = np.array(list(obs.values()))
         return obs_vec, reward, done, False, {}
 
