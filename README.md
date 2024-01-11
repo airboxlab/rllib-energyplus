@@ -98,7 +98,10 @@ Run the amphitheater example with default parameters using Ray RLlib PPO algorit
 ### Using Poetry
 
 ```shell
+# Using Ray Rllib
 poetry run rllib --env AmphitheaterEnv
+# Using Meta Pearl
+poetry run pearl --env AmphitheaterEnv
 ```
 
 ### Using Python
@@ -106,7 +109,10 @@ poetry run rllib --env AmphitheaterEnv
 If you installed dependencies with pip, you can run the example with:
 
 ```shell
+# Using Ray Rllib
 python3 rleplus/train/rllib.py --env AmphitheaterEnv
+# Using Meta Pearl
+python3 rleplus/train/pearl.py --env AmphitheaterEnv
 ```
 
 Example of episode reward stats obtained training with PPO, 1e5 timesteps, 2 workers, with default parameters + LSTM, short E+ run period (2 first weeks of January).

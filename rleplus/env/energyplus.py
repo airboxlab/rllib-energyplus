@@ -118,7 +118,8 @@ class EnergyPlusRunner:
 
         # run EnergyPlus in a non-blocking way
         def _run_energyplus(rn, cmd_args, state, results):
-            print(f"running EnergyPlus with args: {cmd_args}")
+            if self.verbose:
+                print(f"running EnergyPlus with args: {cmd_args}")
 
             # start simulation
             results["exit_code"] = rn.run_energyplus(state, cmd_args)
@@ -268,6 +269,8 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
     """
 
     def __init__(self, env_config: Dict[str, Any]):
+        self.spec = gym.envs.registration.EnvSpec(f"{self.__class__.__name__}")
+
         self.env_config = env_config
         self.episode = -1
         self.timestep = 0
@@ -379,7 +382,6 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         else:
             # post-process action
             action_to_apply = self.post_process_action(action)
-
             # Enqueue action (sent to EnergyPlus through dedicated callback)
             # then wait to get next observation.
             # Timeout is set to 2s to handle end of simulation cases, which happens async
@@ -405,6 +407,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # compute reward
         reward = self.compute_reward(obs)
 
+        # print("obs", obs, "reward", reward, "done", done, "action", action)
         obs_vec = np.array(list(obs.values()))
         return obs_vec, reward, done, False, {}
 

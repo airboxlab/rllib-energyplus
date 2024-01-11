@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rl-energyplus"
-version = "0.6.0"
+version = "0.7.0"
 description = "EnergyPlus Gym Environments for Reinforcement Learning"
 authors = ["Antoine Galataud <antoine@foobot.io>"]
 packages = [
@@ -19,10 +19,12 @@ numpy = "1.23.5"
 protobuf = "3.20.3"
 tensorboard = "^2.9.0"
 torch = "^2.1.1"
+pearl = { git = "https://github.com/facebookresearch/Pearl.git" }
 scipy = "^1.10.0"
 
 [tool.poetry.scripts]
 rllib = "rleplus.train.rllib:main"
+pearl = "rleplus.train.pearl:main"
 tests = "tests:run"
 
 [build-system]
