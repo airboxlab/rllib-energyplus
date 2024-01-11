@@ -9,7 +9,16 @@ from rleplus.env.utils import override
 
 
 class AmphitheaterEnv(EnergyPlusEnv):
-    """University amphitheatre environment."""
+    """University amphitheatre environment.
+
+    This environment is based on an actual university amphitheatre in Luxembourg. The building model
+    (calibrated against actual energy consumption) of this amphitheatre is available in the same folder.
+    The weather file is a typical meteorological year (TMY) weather file.
+
+    HVAC: an AHU with a heating hot water coil, and supply and exhaust air fans.
+
+    Target actuator: supply air temperature setpoint.
+    """
 
     base_path = Path(__file__).parent
 

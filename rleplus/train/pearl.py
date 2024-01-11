@@ -1,5 +1,8 @@
 """An example of how to use Pearl to train a Bootstrapped DQN agent on the Amphitheater
-environment."""
+environment.
+
+See https://github.com/facebookresearch/Pearl for more configuration options.
+"""
 import argparse
 from tempfile import TemporaryDirectory
 
