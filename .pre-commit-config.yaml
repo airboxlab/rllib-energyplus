@@ -33,10 +33,10 @@ repos:
         args: ["-f", "requirements.txt", "-o", "requirements.txt"]
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.7.0
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
-        args: [--py37-plus]
+        args: [--py38-plus]
         name: Upgrade code
 
   # python formatting

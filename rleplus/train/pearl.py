@@ -1,19 +1,21 @@
+"""An example of how to use Pearl to train a Bootstrapped DQN agent on the Amphitheater
+environment."""
 import argparse
 from tempfile import TemporaryDirectory
 
-import torch
-from pearl.action_representation_modules.one_hot_action_representation_module import (
-    OneHotActionTensorRepresentationModule,
+from pearl.action_representation_modules.identity_action_representation_module import (
+    IdentityActionRepresentationModule,
 )
 from pearl.history_summarization_modules.lstm_history_summarization_module import (
     LSTMHistorySummarizationModule,
 )
+from pearl.neural_networks.common.value_networks import EnsembleQValueNetwork
 from pearl.pearl_agent import PearlAgent
-from pearl.policy_learners.sequential_decision_making.ppo import (
-    ProximalPolicyOptimization,
+from pearl.policy_learners.sequential_decision_making.bootstrapped_dqn import (
+    BootstrappedDQN,
 )
-from pearl.replay_buffers.sequential_decision_making.on_policy_episodic_replay_buffer import (
-    OnPolicyEpisodicReplayBuffer,
+from pearl.replay_buffers.sequential_decision_making.bootstrap_replay_buffer import (
+    BootstrapReplayBuffer,
 )
 from pearl.utils.functional_utils.train_and_eval.online_learning import online_learning
 from pearl.utils.instantiations.environments.gym_environment import GymEnvironment
@@ -47,16 +49,6 @@ def parse_args() -> argparse.Namespace:
         default=TemporaryDirectory().name,
     )
     parser.add_argument("--timesteps", "-t", help="Number of timesteps to train", required=False, default=1e6)
-    parser.add_argument(
-        "--use-lstm",
-        action="store_true",
-        help="Whether to use the LSTM history summarization module",
-    )
-    parser.add_argument(
-        "--use-gpu",
-        action="store_true",
-        help="Use a GPU for training",
-    )
 
     built_args = parser.parse_args()
     print(f"Running with following CLI args: {built_args}")
@@ -79,80 +71,62 @@ def main():
     )
     assert isinstance(env.action_space, DiscreteActionSpace)
 
-    # use the identity action representation module (input = output)
-    # action_representation_module = IdentityActionRepresentationModule(
-    #     max_number_actions=env.action_space.n,
-    #     representation_dim=env.action_space.action_dim,
-    # )
-    action_representation_module = OneHotActionTensorRepresentationModule(
-        max_number_actions=env.action_space.n,
-    )
+    # declare some variables about environment dimensions
+    num_actions = env.action_space.n
+    obs_dim = env.observation_space.shape[0]
+    act_dim = env.action_space.action_dim
+    # Policy learner state dim, as well as hidden dim for the LSTM history summarization module.
+    # Note that Pearl flow is: (LSTM) history summarization module -> Policy Learner, hence the LSTM output/hidden dim
+    # is the same as the policy learner's state dim
+    state_dim = 128
 
-    # use the LSTM history summarization module if requested
-    history_summarization_module = (
-        LSTMHistorySummarizationModule(
-            observation_dim=env.observation_space.shape[0],
-            action_dim=100,
-            hidden_dim=env.observation_space.shape[0],
-            history_length=8,
-        )
-        if args.use_lstm
-        else None
-    )
-
-    agent = PearlAgent(
-        policy_learner=ProximalPolicyOptimization(
-            env.observation_space.shape[0],
-            env.action_space,
-            actor_hidden_dims=[64, 64],
-            critic_hidden_dims=[64, 64],
-            training_rounds=50,
-            batch_size=64,
-            epsilon=0.1,
-            action_representation_module=OneHotActionTensorRepresentationModule(max_number_actions=env.action_space.n),
+    # Bootstrapped DQN, is an extension of DQN that uses the so-called "deep exploration" mechanism.
+    # The main idea is to keep an ensemble of k Q-value networks and on each episode, one of them is sampled and the
+    # greedy policy associated with that network is used for exploration.
+    # See: https://arxiv.org/abs/1602.04621
+    k = 10
+    policy_learner = BootstrappedDQN(
+        q_ensemble_network=EnsembleQValueNetwork(
+            state_dim=state_dim,
+            action_dim=act_dim,
+            ensemble_size=k,
+            output_dim=1,
+            hidden_dims=[64, 64],
+            prior_scale=0.3,
         ),
-        replay_buffer=OnPolicyEpisodicReplayBuffer(10_000),
-        history_summarization_module=history_summarization_module,
-        device_id=0 if torch.cuda.is_available() and args.use_gpu else -1,
+        action_space=env.action_space,
+        training_rounds=50,
+        action_representation_module=IdentityActionRepresentationModule(
+            max_number_actions=num_actions,
+            representation_dim=act_dim,
+        ),
     )
+
+    # History summarization module: we use the LSTM history summarization module
+    history_summarization_module = LSTMHistorySummarizationModule(
+        observation_dim=obs_dim,
+        action_dim=act_dim,
+        hidden_dim=state_dim,
+        history_length=8,
+    )
+
+    # Pearl agent
+    agent = PearlAgent(
+        policy_learner=policy_learner,
+        history_summarization_module=history_summarization_module,
+        replay_buffer=BootstrapReplayBuffer(100_000, 1.0, k),
+        device_id=-1,
+    )
+
+    # run the online learning loop
     online_learning(
         agent=agent,
         env=env,
-        number_of_steps=100000,
+        number_of_steps=args.timesteps,
         print_every_x_steps=100,
         record_period=10000,
         learn_after_episode=True,
     )
-
-    # agent = PearlAgent(
-    #     policy_learner=ProximalPolicyOptimization(
-    #         state_dim=env.observation_space.shape[0],
-    #         action_space=env.action_space,
-    #         actor_network_type=VanillaActorNetwork,
-    #         actor_hidden_dims=[256, 256],
-    #         critic_network_type=VanillaValueNetwork,
-    #         critic_hidden_dims=[256, 256],
-    #         actor_learning_rate=0.003,
-    #         critic_learning_rate=0.003,
-    #         discount_factor=0.95,
-    #         training_rounds=30,
-    #         batch_size=1024,
-    #         epsilon=0.1,
-    #         entropy_bonus_scaling=0.01,
-    #         action_representation_module=action_representation_module,
-    #     ),
-    #     replay_buffer=OnPolicyEpisodicReplayBuffer(10_000),
-    #     history_summarization_module=history_summarization_module,
-    #     device_id=0 if torch.cuda.is_available() and args.use_gpu else -1,
-    # )
-    #
-    # online_learning(
-    #     agent=agent,
-    #     env=env,
-    #     number_of_steps=args.timesteps,
-    #     print_every_x_steps=100,
-    #     learn_after_episode=True,
-    # )
 
 
 if __name__ == "__main__":
