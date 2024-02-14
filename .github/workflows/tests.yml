@@ -1,4 +1,4 @@
-name: RLlib EnergyPlus Tests
+name: RL EnergyPlus Tests
 on:
   push:
     branches:
