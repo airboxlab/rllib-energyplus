@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rl-energyplus"
-version = "0.7.0"
+version = "0.8.0"
 description = "EnergyPlus Gym Environments for Reinforcement Learning"
 authors = ["Antoine Galataud <antoine@foobot.io>"]
 packages = [
