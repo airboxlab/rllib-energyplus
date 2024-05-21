@@ -12,7 +12,9 @@ from pearl.action_representation_modules.identity_action_representation_module i
 from pearl.history_summarization_modules.lstm_history_summarization_module import (
     LSTMHistorySummarizationModule,
 )
-from pearl.neural_networks.common.value_networks import EnsembleQValueNetwork
+from pearl.neural_networks.sequential_decision_making.q_value_networks import (
+    EnsembleQValueNetwork,
+)
 from pearl.pearl_agent import PearlAgent
 from pearl.policy_learners.sequential_decision_making.bootstrapped_dqn import (
     BootstrappedDQN,
