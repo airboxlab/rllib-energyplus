@@ -30,7 +30,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output",
-        help="EnergyPlus output directory. Default is a generated one in /tmp/",
+        help="EnergyPlus output directory. Default is a generated one in ~/ray_results/",
         required=False,
         default=TemporaryDirectory().name,
     )
@@ -48,15 +48,9 @@ def parse_args() -> argparse.Namespace:
         help="The number of GPUs to use",
     )
     parser.add_argument(
-        "--alg",
-        default="PPO",
-        choices=["APEX", "DQN", "IMPALA", "PPO", "R2D2"],
-        help="The algorithm to use",
-    )
-    parser.add_argument(
         "--use-lstm",
         action="store_true",
-        help="Whether to auto-wrap the model with an LSTM. Only valid option for " "--run=[IMPALA|PPO|R2D2]",
+        help="Whether to auto-wrap the model with an LSTM",
     )
     built_args = parser.parse_args()
     print(f"Running with following CLI args: {built_args}")
@@ -90,8 +84,8 @@ def main():
                 "use_lstm": args.use_lstm,
                 "vf_share_layers": False,
             },
-            _enable_learner_api=True,
         )
+        .experimental(_enable_new_api_stack=True)
         .rl_module(_enable_rl_module_api=True)
         .framework(
             # to use tensorflow, you'll need install it first,
