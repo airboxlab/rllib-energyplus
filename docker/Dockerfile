@@ -17,7 +17,7 @@ COPY requirements.txt /root/rllib-energyplus/
 
 RUN \
     # install E+
-    apt-get update -qq && apt-get install -y wget && \
+    apt-get update -qq && apt-get install -y wget git && \
     cd /tmp && \
     wget --quiet "${EPLUS_DL_URL}" && \
     export eplus_install="$(echo "${EPLUS_DL_URL}" | rev | cut -d'/' -f1 | rev)" && \
@@ -31,7 +31,12 @@ RUN \
     rm get-pip.py && \
     # install requirements
     cd /root/rllib-energyplus && \
-    pip install --no-cache-dir -r requirements.txt && \
+    # since pip implicitly uses --require-hashes if a hash is present, but
+    # git repos don't have hashes, so we need to split the requirements file
+    grep 'git\+' requirements.txt > requirements-vcs.txt && \
+    grep 'git\+' -v requirements.txt > requirements-hashed.txt && \
+    pip install --no-cache-dir -r requirements-vcs.txt && \
+    pip install --no-cache-dir -r requirements-hashed.txt && \
     # cleanup
     apt autoremove -qq -y && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
 
