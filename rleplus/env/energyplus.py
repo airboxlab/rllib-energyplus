@@ -29,6 +29,7 @@ class RunnerConfig:
     # EnergyPlus meters to request
     meters: Dict[str, str]
     # EnergyPlus actuators to actuate
+    # a dict is used here to handle multiple actuators, but only one is possible in this example (discrete action space)
     actuators: Dict[str, Tuple[str, str, str]]
     # Generate eplusout.csv at end of simulation
     csv: bool = False
@@ -204,10 +205,9 @@ class EnergyPlusRunner:
 
         # keep last action to resend it if needed (see above)
         self.last_action = next_action
-
-        self.x.set_actuator_value(
-            state=state_argument, actuator_handle=self.actuator_handles["sat_spt"], actuator_value=next_action
-        )
+        # we only have one actuator in this example
+        actuator_handle = list(self.actuator_handles.values())[0]
+        self.x.set_actuator_value(state=state_argument, actuator_handle=actuator_handle, actuator_value=next_action)
 
     def _init_callback(self, state_argument) -> bool:
         """Initialize EnergyPlus handles and checks if simulation runtime is ready."""
