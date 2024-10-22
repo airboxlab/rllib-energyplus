@@ -3,8 +3,8 @@ FROM ubuntu:22.04
 LABEL org.opencontainers.image.source="https://github.com/airboxlab/rllib-energyplus"
 LABEL org.opencontainers.image.description="EnergyPlus Env for Reinforcement Learning in Building Energy Management Systems"
 
-ARG EPLUS_VERSION=23-2-0
-ARG EPLUS_DL_URL=https://github.com/NREL/EnergyPlus/releases/download/v23.2.0/EnergyPlus-23.2.0-7636e6b3e9-Linux-Ubuntu22.04-x86_64.sh
+ARG EPLUS_VERSION=24-2-0
+ARG EPLUS_DL_URL=https://github.com/NREL/EnergyPlus/releases/download/v24.2.0a/EnergyPlus-24.2.0-94a887817b-Linux-Ubuntu22.04-x86_64.sh
 
 ENV DEBIAN_FRONTEND=noninteractive \
     HOME=/home/ray \
@@ -16,8 +16,8 @@ SHELL ["/bin/bash", "-c"]
 COPY requirements.txt /root/rllib-energyplus/
 
 RUN \
-    # install E+
-    apt-get update -qq && apt-get install -y wget git && \
+    # install E+. E+ 24.2.0 requires libgomp1
+    apt-get update -qq && apt-get install -y wget git libgomp1 && \
     cd /tmp && \
     wget --quiet "${EPLUS_DL_URL}" && \
     export eplus_install="$(echo "${EPLUS_DL_URL}" | rev | cut -d'/' -f1 | rev)" && \
