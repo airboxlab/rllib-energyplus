@@ -1,4 +1,4 @@
-  Version,23.2;
+  Version,24.2;
 
   Timestep,4;
 
@@ -8232,12 +8232,8 @@
     Autosize,                !- Nominal Supply Air Flow Rate {m3/s}
     0.76,                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
     0.68,                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
-    0.81,                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
-    0.73,                    !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
     0.76,                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
     0.68,                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
-    0.81,                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
-    0.73,                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
     Node 7,                  !- Supply Air Inlet Node Name
     Node 20,                 !- Supply Air Outlet Node Name
     Node 21,                 !- Exhaust Air Inlet Node Name
@@ -8249,7 +8245,85 @@
     1.7,                     !- Threshold Temperature {C}
     ,                        !- Initial Defrost Time Fraction {dimensionless}
     ,                        !- Rate of Defrost Time Fraction Increase {1/K}
-    Yes;                     !- Economizer Lockout
+    Yes,                     !- Economizer Lockout
+    Air-to-Air Plate HX_1,   !- Sensible Effectiveness of Heating Air Flow Curve Name
+    Air-to-Air Plate HX_2,   !- Latent Effectiveness of Heating Air Flow Curve Name
+    Air-to-Air Plate HX_3,   !- Sensible Effectiveness of Cooling Air Flow Curve Name
+    Air-to-Air Plate HX_4;   !- Latent Effectiveness of Cooling Air Flow Curve Name
+
+  Table:Lookup,
+    Air-to-Air Plate HX_1,   !- Name
+    effectiveness_IndependentVariableList,  !- Independent Variable List Name
+    DivisorOnly,             !- Normalization Method
+    0.76,                    !- Normalization Divisor
+    0.0,                     !- Minimum Output
+    10.0,                    !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.81,                    !- Output Value 1
+    0.76;                    !- Output Value 2
+
+  Table:Lookup,
+    Air-to-Air Plate HX_2,   !- Name
+    effectiveness_IndependentVariableList,  !- Independent Variable List Name
+    DivisorOnly,             !- Normalization Method
+    0.68,                    !- Normalization Divisor
+    0.0,                     !- Minimum Output
+    10.0,                    !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.73,                    !- Output Value 1
+    0.68;                    !- Output Value 2
+
+  Table:Lookup,
+    Air-to-Air Plate HX_3,   !- Name
+    effectiveness_IndependentVariableList,  !- Independent Variable List Name
+    DivisorOnly,             !- Normalization Method
+    0.76,                    !- Normalization Divisor
+    0.0,                     !- Minimum Output
+    10.0,                    !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.81,                    !- Output Value 1
+    0.76;                    !- Output Value 2
+
+  Table:Lookup,
+    Air-to-Air Plate HX_4,   !- Name
+    effectiveness_IndependentVariableList,  !- Independent Variable List Name
+    DivisorOnly,             !- Normalization Method
+    0.68,                    !- Normalization Divisor
+    0.0,                     !- Minimum Output
+    10.0,                    !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.73,                    !- Output Value 1
+    0.68;                    !- Output Value 2
+
+  Table:IndependentVariableList,
+    effectiveness_IndependentVariableList,  !- Name
+    HxAirFlowRatio;          !- Independent Variable 1 Name
+
+  Table:IndependentVariable,
+    HxAirFlowRatio,          !- Name
+    Linear,                  !- Interpolation Method
+    Linear,                  !- Extrapolation Method
+    0.0,                     !- Minimum Value
+    10.0,                    !- Maximum Value
+    ,                        !- Normalization Reference Value
+    Dimensionless,           !- Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.75,                    !- Value 1
+    1.0;                     !- Value 2
 
   SetpointManager:MixedAir,
     Node 20 OS Default SPM,  !- Name
@@ -8658,7 +8732,7 @@
     SecondarySchool Bldg Light,  !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    2.17969185938372,        !- Watts per Zone Floor Area {W/m2}
+    2.17969185938372,        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     ,                        !- Fraction Radiant
@@ -8684,7 +8758,7 @@
     SecondarySchool Bldg Equip,  !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    0.58555672666901,        !- Watts per Zone Floor Area {W/m2}
+    0.58555672666901,        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Fraction Latent
     ,                        !- Fraction Radiant
