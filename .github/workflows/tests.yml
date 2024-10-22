@@ -23,7 +23,7 @@ jobs:
       - name: Setup Poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
-          poetry-version: "1.5.1"
+          poetry-version: "1.7.1"
 
       - name: Setup python
         uses: actions/setup-python@v5
@@ -33,9 +33,7 @@ jobs:
 
       - name: Install EnergyPlus
         run: |
-          ENERGYPLUS_VERSION="23.2.0"
-          ENERGYPLUS_SHA="7636e6b3e9"
-          ENERGYPLUS_DOWNLOAD_URL="https://github.com/NREL/EnergyPlus/releases/download/v${ENERGYPLUS_VERSION}/EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_SHA}-Linux-Ubuntu22.04-x86_64.sh"
+          ENERGYPLUS_DOWNLOAD_URL="https://github.com/NREL/EnergyPlus/releases/download/v24.2.0a/EnergyPlus-24.2.0-94a887817b-Linux-Ubuntu22.04-x86_64.sh"
           wget --quiet "${ENERGYPLUS_DOWNLOAD_URL}" -O /tmp/eplus_install.sh
           (echo "y"; echo ""; echo "y";) | sudo bash /tmp/eplus_install.sh
 
