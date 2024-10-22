@@ -37,6 +37,10 @@ jobs:
           wget --quiet "${ENERGYPLUS_DOWNLOAD_URL}" -O /tmp/eplus_install.sh
           (echo "y"; echo ""; echo "y";) | sudo bash /tmp/eplus_install.sh
 
+      - name: Check EnergyPlus installation
+        run: |
+          energyplus -v
+
       - name: Execute tests
         env:
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
