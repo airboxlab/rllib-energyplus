@@ -141,8 +141,17 @@ class EnergyPlusRunner:
         if not self.simulation_complete:
             self.simulation_complete = True
             self._flush_queues()
-            self.energyplus_exec_thread.join()
-            self.energyplus_exec_thread = None
+
+            if self.energyplus_exec_thread:
+                # wait for E+ thread to finish
+                # in some occasions, join() raises a RuntimeError("cannot join current thread")
+                # this should not prevent moving forward and cleaning up
+                try:
+                    self.energyplus_exec_thread.join()
+                except RuntimeError:
+                    pass
+                self.energyplus_exec_thread = None
+
             self.energyplus_api.runtime.clear_callbacks()
             self.energyplus_api.state_manager.delete_state(self.energyplus_state)
 
