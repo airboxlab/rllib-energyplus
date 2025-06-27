@@ -12,13 +12,13 @@ name = "PyPI"
 priority = "primary"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.9,<3.12"
 ray = { version = "2.12.0", extras = ["default", "rllib"] }
 gymnasium = "0.28.1"
 numpy = "1.23.5"
 protobuf = "3.20.3"
 tensorboard = "^2.9.0"
-torch = "^2.1.1"
+torch = "2.6.0"
 pearl = { git = "https://github.com/facebookresearch/Pearl.git" }
 scipy = "^1.10.0"
 pydantic = "2.7.1"
