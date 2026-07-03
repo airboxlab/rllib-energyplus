@@ -24,19 +24,15 @@ RUN \
     (echo "y"; echo ""; echo "y";) | bash "$eplus_install" && \
     rm "$eplus_install" && \
     # install python3.12
-    apt-get install -y python3.12 python3.12-dev python3.12-distutils && \
-    # install pip
-    wget https://bootstrap.pypa.io/get-pip.py && \
-    python3.12 get-pip.py && \
-    rm get-pip.py && \
+    apt-get install -y python3.12 python3.12-dev python3-pip && \
     # install requirements
     cd /root/rllib-energyplus && \
     # since pip implicitly uses --require-hashes if a hash is present, but
     # git repos don't have hashes, so we need to split the requirements file
     grep 'git\+' requirements.txt > requirements-vcs.txt && \
     grep 'git\+' -v requirements.txt > requirements-hashed.txt && \
-    pip install --no-cache-dir -r requirements-vcs.txt && \
-    pip install --no-cache-dir -r requirements-hashed.txt && \
+    pip install --break-system-packages --no-cache-dir -r requirements-vcs.txt && \
+    pip install --break-system-packages --no-cache-dir -r requirements-hashed.txt && \
     # cleanup
     apt autoremove -qq -y && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
 
