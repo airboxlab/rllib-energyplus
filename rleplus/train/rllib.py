@@ -42,12 +42,6 @@ def parse_args() -> argparse.Namespace:
         help="The number of workers to use",
     )
     parser.add_argument(
-        "--num-gpus",
-        type=int,
-        default=0,
-        help="The number of GPUs to use",
-    )
-    parser.add_argument(
         "--use-lstm",
         action="store_true",
         help="Whether to auto-wrap the model with an LSTM",
@@ -67,6 +61,14 @@ def main():
     # Ray configuration. See Ray docs for tuning
     config = (
         PPOConfig()
+        .framework(
+            # to use tensorflow, you'll need install it first,
+            # then set framework="tf2" and eager_tracing=True (for fast exec)
+            framework="torch",
+        )
+        # Set num_gpus to 0 for CPU training. If you have a GPU, you'll need to install GPU-enabled PyTorch
+        # and set num_gpus=1. See Ray docs for more info.
+        .resources(num_gpus=0)
         .environment(
             env=args.env,
             env_config=vars(args),
@@ -76,7 +78,7 @@ def main():
             lr=0.003,
             kl_coeff=0.3,
             train_batch_size=4000,
-            sgd_minibatch_size=128,
+            minibatch_size=128,
             vf_loss_coeff=0.01,
             use_critic=True,
             use_gae=True,
@@ -85,17 +87,9 @@ def main():
                 "vf_share_layers": False,
             },
         )
-        .experimental(_enable_new_api_stack=True)
-        .rl_module(_enable_rl_module_api=True)
-        .framework(
-            # to use tensorflow, you'll need install it first,
-            # then set framework="tf2" and eager_tracing=True (for fast exec)
-            framework="torch",
-        )
-        .resources(num_gpus=args.num_gpus)
-        .rollouts(
-            num_rollout_workers=args.num_workers,
+        .env_runners(
             rollout_fragment_length="auto",
+            num_env_runners=args.num_workers,
         )
     )
 
