@@ -6,7 +6,8 @@ This project implements a gym environment that handles [EnergyPlus](https://ener
 for Reinforcement Learning (RL) experiments, using the EnergyPlus Python API.
 It also provides a set of examples and tools to train RL agents.
 
-Requires Python 3.12, EnergyPlus 9.3+
+Requires Python 3.12, EnergyPlus 9.3+.
+
 Torch CPU-only is included in this project, but you can install a GPU version of torch if you want to use a GPU.
 
 ## Setup
