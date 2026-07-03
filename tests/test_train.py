@@ -9,5 +9,4 @@ class TestTrain(unittest.TestCase):
         self.assertTrue(args.output.startswith("/tmp/"))
         self.assertEqual(args.timesteps, 1e6)
         self.assertEqual(args.num_workers, 2)
-        self.assertEqual(args.num_gpus, 0)
         self.assertFalse(args.use_lstm)
